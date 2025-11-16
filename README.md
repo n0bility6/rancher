@@ -1,2 +1,2 @@
-# rancher
+# Suse Rancher Guide
 Suse Rancher
