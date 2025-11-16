@@ -1,2 +1,3 @@
 # Suse Rancher Guide
-Suse Rancher
+
+[Provision RKE2 cluster for Rancher](https://github.com/n0bility6/rancher/blob/main/RKE2.md)
