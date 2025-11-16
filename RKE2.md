@@ -280,3 +280,59 @@ deployment "rancher" successfully rolled out
 ```
 
 You should be able to access Rancher UI using the FQDN.
+
+### Adding New Masternodes
+
+1. On the new master node
+
+   Create or edit the RKE2 configuration file **/etc/rancher/rke2/config.yaml** to point to the existing cluster's main server URL and include the node token used for cluster authentication. The file should look like this:
+```
+server: https://<existing-master-node-ip>:9345
+token: <node-token-from-existing-master>
+```
+   You can get the current node token from an existing master node by retrieving the content of **/var/lib/rancher/rke2/server/node-token**.
+   
+2. Clean up any previous RKE2 installation or remnants on the new node:
+
+   Run the RKE2 kill script to stop all RKE2 processes:
+
+```
+/usr/local/bin/rke2-killall.sh
+```
+   Delete the old database if any:
+
+```
+sudo rm -rf /var/lib/rancher/rke2/server/db
+```
+
+3. Install RKE2 on the new master node if not already installed:
+```
+curl -sfL https://get.rke2.io | sh -
+```
+4. Enable and start the RKE2 server service:
+```
+systemctl enable rke2-server.service
+systemctl start rke2-server.service
+```
+
+5. Setup kubectl
+   
+```
+cd ~
+echo "PATH=$PATH:/usr/local/bin:/var/lib/rancher/rke2/bin" >> .bashrc
+PATH=$PATH:/usr/local/bin:/var/lib/rancher/rke2/bin
+mkdir .kube
+
+sudo cat /etc/rancher/rke2/rke2.yaml > .kube/config
+Or
+export KUBECONFIG=/etc/rancher/rke2/rke2.yaml #(required every login)
+```
+6. Verify the new master node has joined the cluster by checking nodes from any existing master node with:
+
+```
+kubectl get nodes
+
+NAME                  STATUS   ROLES                       AGE     VERSION
+rke2-master1-ubuntu   Ready    control-plane,etcd,master   50m     v1.33.5+rke2r1
+rke2-master2-ubuntu   Ready    control-plane,etcd,master   7m58s   v1.33.5+rke2r1
+```
