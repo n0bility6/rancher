@@ -8,7 +8,7 @@ Summary:
  - create folder /etc/rancher/rke2/config.yaml.d/
  - create 50-rancher in /etc/rancher/rke2/config.yaml.d/50-rancher.yaml
  - sudo systemctl reboot
- - curl -sfL https://get.rke2.io | sudo INSTALL_RKE2_VERSION=v1.33.3 sh -
+ - curl -sfL https://get.rke2.io | sudo sh -
  - if the node has no Role type "kubectl label node <nodename> node-role.kubernetes.io/worker=true"
 
 Steps
