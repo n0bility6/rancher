@@ -9,6 +9,7 @@ Summary:
  - create 50-rancher in /etc/rancher/rke2/config.yaml.d/50-rancher.yaml
  - sudo systemctl reboot
  - curl -sfL https://get.rke2.io | sudo sh -
+ - sudo systemctl enable --now rke2-agent.service
  - if the node has no Role type "kubectl label node <nodename> node-role.kubernetes.io/worker=true"
 
 Steps
