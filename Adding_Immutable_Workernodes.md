@@ -3,6 +3,10 @@
 
 1. On the new worker node
 
+Register the OS
+```
+sudo transactional-update register -r abcdefg1234567
+```
 Login as root and shell into transactional update
 ```
 transactional-update shell
