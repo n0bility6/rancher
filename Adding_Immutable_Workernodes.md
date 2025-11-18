@@ -2,7 +2,7 @@
 ## Adding Suse Micro 6.1 Immutable OS as Worker Node
 Summary:
  - Register
- - update packages nfs-client openssh curl
+ - update packages nfs-client openssh curl iptables
  - create RKE2 folder in /etc/rancher/rke2
  - create config file /etc/rancher/rke2/config.yaml
  - create folder /etc/rancher/rke2/config.yaml.d/
