@@ -12,7 +12,7 @@ The proper approach is to replace Kubernetes nodes one at a time without cluster
 
 Deploy new VMs with SLE Micro installed. Configure 
 
-- **Manual Installation**: Use the SLE Micro ISO to install on new VMs.
+**Manual Installation**: Use the SLE Micro ISO to install on new VMs.
 
 **2. Join New Nodes to the Cluster**
 
