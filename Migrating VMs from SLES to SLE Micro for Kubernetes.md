@@ -1,0 +1,95 @@
+# Migrating VMs from SLES to SLE Micro for Kubernetes Nodes
+
+**There is no supported in-place migration path from SLES (SUSE Linux Enterprise Server) to SLE Micro 6.x 
+
+The two operating systems have fundamentally different architectures—SLES is a traditional general-purpose server OS, while SLE Micro is an immutable, container-optimized lightweight OS designed specifically for edge computing and Kubernetes workloads. You must perform a fresh installation of SLE Micro and replace the existing nodes in Kubernetes cluster.
+
+### Recommended Migration Strategy: **Node Replacement**
+
+The proper approach is to replace Kubernetes nodes one at a time without cluster disruption. This follows Kubernetes best practices for node maintenance and OS changes.
+
+**1. Prepare New SLE Micro Nodes**
+
+Deploy new VMs with SLE Micro installed. Configure 
+
+- **Manual Installation**: Use the SLE Micro ISO to install on new VMs.
+
+**2. Join New Nodes to the Cluster**
+
+Before removing old nodes, add the new SLE Micro nodes to Kubernetes cluster:
+
+- For RKE2 clusters, install RKE2 on the new SLE Micro nodes and join them to the cluster.
+- Verify the new nodes are in Ready state: `kubectl get nodes`
+
+**3. Safely Drain and Remove Old SLES Nodes**
+
+For each SLES node you want to replace, follow this procedure:
+
+**a. Cordon the node** to prevent new pod scheduling:
+
+```bash
+kubectl cordon <node-name>
+```
+
+**b. Drain the node** to evict all pods gracefully:
+
+```bash
+kubectl drain <node-name> --ignore-daemonsets --delete-emptydir-data
+```
+
+This command:
+
+- Automatically cordons the node if not already done
+- Evicts pods while respecting PodDisruptionBudgets and terminationGracePeriodSeconds
+- Reschedules pods to other available nodes (including new SLE Micro nodes).
+
+**c. Verify pods have been rescheduled:**
+
+```bash
+kubectl get pods -o wide --all-namespaces | grep <node-name>
+```
+
+**d. Remove the node from the cluster:**
+
+```bash
+kubectl delete node <node-name>
+```
+
+**e. Shut down or delete the old SLES VM**
+
+**4. Repeat for All Nodes**
+
+Process one node at a time to maintain cluster availability and capacity. This rolling replacement strategy ensures.
+
+- No disruption to running workloads
+- Maintained cluster capacity throughout migration
+- Ability to rollback if issues arise
+
+
+
+### SELinux Validation on SLE Micro
+
+SLE Micro enforces SELinux in enforcing mode by default. It is important to validate SELinux status and ensure workloads and configurations are compatible.
+
+**Validation Check:**
+
+After deploying or before joining the new SLE Micro node to the cluster, run:
+
+```bash
+sestatus
+```
+
+You should see `SELinux status: enabled` and `Current mode: enforcing`.
+
+If  workloads require custom SELinux policies, ensure they are applied before running containers.
+
+---
+### Additional Considerations
+
+**Workload Compatibility**: Kubernetes supports heterogeneous clusters with worker nodes running different operating systems, as long as Kubernetes and container runtime versions are compatible. Existing workloads should run on SLE Micro without modification.
+
+
+
+**Stateful Workloads**: For pods with PersistentVolumeClaims or StatefulSets, ensure proper PodDisruptionBudgets are configured to prevent data loss during draining. Consider using `--force` flag cautiously if standard drain fails.
+
+**DaemonSets**: The `--ignore-daemonsets` flag is necessary because DaemonSet pods cannot be rescheduled to other nodes—they're designed to run on every node.
