@@ -114,5 +114,5 @@ kubectl get nodes
 ```
 8. Set workernode role to worker if **None**. 
 ```
-kubectl label nodename node-role.kubernetes.io/worker=true
+kubectl label node nodename node-role.kubernetes.io/worker=true
 ```
